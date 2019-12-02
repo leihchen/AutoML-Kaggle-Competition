@@ -35,7 +35,7 @@ y_val = df["val_error"]
 y_tr = df["train_error"]
 
 # include all and let pca decide, acc decrease: noise added
-X = df[feature_all[116:166]] # train acc
+X = df[feature_all[16:] + ['number_parameters', 'epochs']] # train acc
 X = preprocessing.scale(X)
 # print(X.shape)
 # pca = decomposition.PCA(.95)
@@ -54,7 +54,7 @@ y_pred_tr = regr_tr.predict(X_test_tr)
 print('training err: R2 metric = ', sk.metrics.r2_score(y_test_tr, y_pred_tr))
 
 #############
-X = df[feature_all[16:66]] # val acc
+X = df[feature_all[16:] + ['number_parameters', 'epochs']] # val acc
 X = preprocessing.scale(X)
 # only 1 feature survived pca 95% var, acc decreases?
 # print(X.shape)
@@ -77,9 +77,9 @@ print('validation err: R2 metric = ', sk.metrics.r2_score(y_test_val, y_pred_val
 df_t = pd.DataFrame.from_csv("data/test.csv")
 # for i in range(len(df_t.columns)):
 #     print(i, df_t.columns[i])
-X_ex_tr = preprocessing.scale(df_t[df_t.columns[112:162]])
-X_ex_val = preprocessing.scale(df_t[df_t.columns[12:62]])
-test_to_csv(regr_tr, regr_val, X_ex_tr, X_ex_val, filename="v2.csv")
+X_ex_tr = preprocessing.scale(df_t[ list(df_t.columns[12:]) + ['number_parameters', 'epochs']])
+X_ex_val = preprocessing.scale(df_t[ list(df_t.columns[12:]) + ['number_parameters', 'epochs']])
+test_to_csv(regr_tr, regr_val, X_ex_tr, X_ex_val, filename="v3.csv")
 
 ### explore xgboost
 # xgb_train = xgb.DMatrix(X_train_val, label=y_train_val)
