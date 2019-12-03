@@ -74,13 +74,18 @@ def flops_param_calculator(arch_hp):
 # flops, params = profile(model, inputs=(input, ))
 # print(flops, params)
 
-df = pd.DataFrame.from_csv("data/train.csv")
-flops_ex = []
-params_ex = []
-archs = (df['arch_and_hp'])
-for i in range(archs.shape[0]):
-    nn_str = parse_layer(archs[i])
-    flops, params = flops_param_calculator(nn_str)
-    flops_ex.append(flops)
-    params_ex.append(params)
-print(len(flops_ex), len(params_ex))
+# df = pd.DataFrame.from_csv("data/train.csv")
+def apply_flops(df_):
+    flops_ex = []
+    params_ex = []
+    archs = (df_['arch_and_hp'])
+    for i in range(archs.shape[0]):
+        nn_str = parse_layer(archs[i])
+        flops, params = flops_param_calculator(nn_str)
+        flops_ex.append(flops)
+        params_ex.append(params)
+    return pd.DataFrame(flops_ex)
+
+# print(len(flops_ex), len(params_ex))
+# print(flops_ex)
+# print(params_ex)
