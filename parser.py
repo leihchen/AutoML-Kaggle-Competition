@@ -74,7 +74,6 @@ def flops_param_calculator(arch_hp):
 # flops, params = profile(model, inputs=(input, ))
 # print(flops, params)
 
-# df = pd.DataFrame.from_csv("data/train.csv")
 def apply_flops(df_):
     flops_ex = []
     params_ex = []
@@ -84,8 +83,24 @@ def apply_flops(df_):
         flops, params = flops_param_calculator(nn_str)
         flops_ex.append(flops)
         params_ex.append(params)
-    return pd.DataFrame(flops_ex)
+    return pd.DataFrame({'tot_flops': params_ex})
 
+
+def apply_ops_hist(df_):
+    ret = np.empty((df_.shape[0], 13))
+    archs = (df_['arch_and_hp'])
+    for i in range(archs.shape[0]):
+        ret[i] = parse_struct(archs[i])
+    df_ret = pd.DataFrame(ret)
+    df_ret.columns = ['ReLU', 'LeakyReLU', 'SELU', 'Linear', 'Conv2d', 'BatchNorm1d', 'BatchNorm2d', 'Flatten', 'Dropout', 'Dropout2d', 'Tanh', 'Softmax', 'MaxPool2d']
+    return df_ret
 # print(len(flops_ex), len(params_ex))
 # print(flops_ex)
 # print(params_ex)
+
+
+df = pd.DataFrame.from_csv("data/train.csv")
+# print(list(apply_ops_hist(df).loc[0,:]))
+verf = df.join(apply_flops(df))
+diff = verf.loc[verf.tot_flops != verf.number_parameters]
+print(diff)
