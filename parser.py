@@ -30,3 +30,20 @@ def calculate_flop(archline):
         print(result)
         temp = archline.find(': Conv2d(', Conv2dstart + 1)
         Conv2dstart = temp
+
+def parse_layer(archline):
+    Conv2dstart = archline.find('): ')
+    flag = 0
+    while(Conv2dstart != -1):
+        strstart = Conv2dstart
+        while(archline[strstart] != '('):
+            strstart -= 1
+        strstart -= 1
+        target = archline[strstart:Conv2dstart+2]
+        if (flag == 0):
+            archline = archline.replace(target, '')
+            flag = 1
+        else:
+            archline = archline.replace(target, ',')
+        Conv2dstart = archline.find('): ')
+    print(archline)
