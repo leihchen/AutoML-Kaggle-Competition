@@ -1,5 +1,12 @@
 import re
 from functools import reduce
+from torch import nn as nn
+from thop import profile
+import torch
+from torch.nn import Sequential, ReLU, LeakyReLU, SELU, Linear, Conv2d, BatchNorm1d, BatchNorm2d, Dropout, Dropout2d, Tanh, Softmax, MaxPool2d, Flatten
+import pandas as pd
+import numpy as np
+
 def parse_struct(archline):
     ReLU = archline.count(": ReLU(")
     LeakyReLU = archline.count(": LeakyReLU(")
@@ -16,6 +23,7 @@ def parse_struct(archline):
     MaxPool2d = archline.count(": MaxPool2d(")
     return ReLU, LeakyReLU, SELU, Linear, Conv2d, BatchNorm1d, BatchNorm2d, Flatten, Dropout, Dropout2d, Tanh, Softmax, MaxPool2d
 
+
 def calculate_flop(archline):
     result = 0
     Conv2dstart = archline.find(': Conv2d(')
@@ -30,6 +38,7 @@ def calculate_flop(archline):
         print(result)
         temp = archline.find(': Conv2d(', Conv2dstart + 1)
         Conv2dstart = temp
+
 
 def parse_layer(archline):
     Conv2dstart = archline.find('): ')
@@ -46,4 +55,32 @@ def parse_layer(archline):
         else:
             archline = archline.replace(target, ',')
         Conv2dstart = archline.find('): ')
-    print(archline)
+    return archline
+
+
+def flops_param_calculator(arch_hp):
+    try:
+        model = eval(arch_hp)
+    except Exception:
+        print('Fail to evalute string as nn: ', Exception)
+        return
+    return profile(model, inputs=(torch.randn(1, 3, 32, 32), ), verbose=False)
+
+
+# eval to nn
+# arch = "Sequential( Conv2d(3, 28, ernel_size=(1, 1), stride=(1, 1)) ,Flatten(), Linear(in_features=28672, out_features=29, bias=True) , BatchNorm1d(29, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True) , Tanh() , Tanh() , Tanh() , Dropout(p=0.714631919301416), Linear(in_features=29, out_features=47, bias=True),Dropout(p=0.97788680890307) , Linear(in_features=47, out_features=10, bias=True) ,Tanh() ,Softmax() )"
+# model = eval(arch)
+# input = torch.randn(1, 3, 32, 32) # CIFAR10 dim
+# flops, params = profile(model, inputs=(input, ))
+# print(flops, params)
+
+df = pd.DataFrame.from_csv("data/train.csv")
+flops_ex = []
+params_ex = []
+archs = (df['arch_and_hp'])
+for i in range(archs.shape[0]):
+    nn_str = parse_layer(archs[i])
+    flops, params = flops_param_calculator(nn_str)
+    flops_ex.append(flops)
+    params_ex.append(params)
+print(len(flops_ex), len(params_ex))
