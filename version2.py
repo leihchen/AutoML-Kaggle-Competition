@@ -15,9 +15,10 @@ from xgboost import plot_importance
 from tqdm import tqdm
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
-from parser_1 import apply_flops
+from parser_1 import apply_flops, apply_ops_hist
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 def test_to_csv(Regr_train_err, Regr_validation_err, Data_train_std, Data_validation_std, filename='test_result.csv'):
     pt = Regr_train_err.predict(Data_train_std)
@@ -43,9 +44,10 @@ y_val = df["val_error"]
 y_tr = df["train_error"]
 
 # include all and let pca decide, acc decrease: noise added
-X = (df[feature_all[156:166] + ['number_parameters', 'epochs']]).join(flops) # train acc
-# print(X)
+X = (df[feature_all[157:167]+ ['number_parameters', 'epochs']]).join(flops) # train acc
+pd.DataFrame(X).to_csv('data matrix.csv')
 X = preprocessing.scale(X)
+# print(np.array(list(df['init_params_mu']), dtype=np.ndarray).shape)
 # print(X.shape)
 # pca = decomposition.PCA(.95)
 # X = pca.fit_transform(X)
@@ -68,22 +70,23 @@ parameter_candidates = {
     "n_estimators":[120, 140, 160]
 }
 
-regr_tr = GridSearchCV(estimator=ensemble.GradientBoostingRegressor(), 
-                    param_grid=parameter_candidates,
-                    cv=5,
-                    refit=True,
-                    error_score=0,
-                    n_jobs=-1)
+# regr_tr = GridSearchCV(estimator=ensemble.GradientBoostingRegressor(),
+#                     param_grid=parameter_candidates,
+#                     cv=5,
+#                     refit=True,
+#                     error_score=0,
+#                     n_jobs=-1)
 # regr_tr = sk.linear_model.LinearRegression()
 # regr_tr.fit(X_train_tr, y_train_tr)  # cross validation
+regr_tr = ensemble.GradientBoostingRegressor(criterion= 'friedman_mse', learning_rate=0.1, loss= 'ls', max_depth= 5, max_features='sqrt', n_estimators= 80, subsample= 0.95)
 regr_tr.fit(X, y_tr)  # submission
 y_pred_tr = regr_tr.predict(X_test_tr)
-print('the optimal params we found are: ', regr_tr.best_params_)
+# print('the optimal params we found are: ', regr_tr.best_params_)
 print('training err: R2 metric = ', sk.metrics.r2_score(y_test_tr, y_pred_tr))
 
 #############
 # use same X
-X = df[feature_all[56:66] + ['number_parameters', 'epochs']].join(flops) # val acc
+X = df[feature_all[57:67] + ['number_parameters', 'epochs']].join(flops) # val acc
 X = preprocessing.scale(X)
 # only 1 feature survived pca 95% var, acc decreases?
 # print(X.shape)
@@ -99,26 +102,29 @@ X_train_val, X_test_val, y_train_val, y_test_val = model_selection.train_test_sp
 
 ###
 
-regr_val = GridSearchCV(estimator=ensemble.GradientBoostingRegressor(), 
-                    param_grid=parameter_candidates,
-                    cv=5,
-                    refit=True,
-                    error_score=0,
-                    n_jobs=-1)
+# regr_val = GridSearchCV(estimator=ensemble.GradientBoostingRegressor(),
+#                     param_grid=parameter_candidates,
+#                     cv=5,
+#                     refit=True,
+#                     error_score=0,
+#                     n_jobs=-1)
+regr_val = ensemble.GradientBoostingRegressor(criterion='friedman_mse', learning_rate= 0.1, loss='lad', max_depth=3, max_features= 'auto', n_estimators= 80, subsample= 0.8)
+
 # regr_val = sk.linear_model.LinearRegression()
 # regr_val.fit(X_train_val, y_train_val)  # cross validation
 regr_val.fit(X, y_val)  # submission
 y_pred_val = regr_val.predict(X_test_val)
-print('the optimal params we found are: ', regr_val.best_params_)
+# print('the optimal params we found are: ', regr_val.best_params_)
 print('validation err: R2 metric = ', sk.metrics.r2_score(y_test_val, y_pred_val))
 
 df_t = pd.read_csv("data/test.csv")
 # for i in range(len(df_t.columns)):
 #     print(i, df_t.columns[i])
 flops_t = apply_flops(df_t)
-X_ex_tr = preprocessing.scale(df_t[ list(df_t.columns[152:162]) + ['number_parameters', 'epochs']].join(flops_t))
-X_ex_val = preprocessing.scale(df_t[ list(df_t.columns[52:62]) + ['number_parameters', 'epochs']].join(flops_t))
-# test_to_csv(regr_tr, regr_val, X_ex_tr, X_ex_val, filename="v6.csv")
+op_hist = apply_ops_hist(df_t)
+X_ex_tr = preprocessing.scale(df_t[list(df_t.columns[153:163]) + ['number_parameters', 'epochs']].join(flops_t))
+X_ex_val = preprocessing.scale(df_t[list(df_t.columns[53:63]) + ['number_parameters', 'epochs']].join(flops_t))
+test_to_csv(regr_tr, regr_val, X_ex_tr, X_ex_val, filename="v11.csv")
 
 ### explore xgboost
 # xgb_train = xgb.DMatrix(X_train_val, label=y_train_val)
