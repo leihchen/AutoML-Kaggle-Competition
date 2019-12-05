@@ -147,7 +147,7 @@ X_ex = preprocessing.scale(df_t[feature_all[57:67] + feature_all[107:117] + feat
     join(diff_avg(df_t[feature_all[67:117]], 'val_losses_diff')).\
     join(diff_avg(df_t[feature_all[117:167]], 'train_accs_diff')).\
     join(diff_avg(df_t[feature_all[167:217]], 'train_losses_diff')))
-# test_to_csv(regr_tr, regr_val, X_ex, X_ex, filename="v12.csv")
+test_to_csv(regr_tr, regr_val, X_ex, X_ex, filename="v14.csv")
 
 ### explore xgboost
 # xgb_train = xgb.DMatrix(X_train_val, label=y_train_val)
