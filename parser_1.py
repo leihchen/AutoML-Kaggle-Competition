@@ -99,8 +99,40 @@ def apply_ops_hist(df_):
 # print(params_ex)
 
 
-df = pd.read_csv("data/train.csv")
-# print(list(apply_ops_hist(df).loc[0,:]))
-verf = df.join(apply_flops(df))
-diff = verf.loc[verf.tot_flops != verf.number_parameters]
-# print(diff)
+def apply_init_params(df_):
+    im = np.array(df_['init_params_mu'], dtype=str)
+    ex1 = np.zeros((len(im), 2))
+    for i in range(len(im)):
+        ex1[i] = np.sum(np.array(eval(im[i])).reshape([-1, 2]), axis=0)
+
+    im = np.array(df_['init_params_std'], dtype=str)
+    ex2 = np.zeros((len(im), 2))
+    for i in range(len(im)):
+        ex2[i] = np.sum(np.array(eval(im[i])).reshape([-1, 2]), axis=0)
+
+    im = np.array(df_['init_params_l2'], dtype=str)
+    ex3 = np.zeros((len(im), 2))
+    for i in range(len(im)):
+        ex3[i] = np.sum(np.array(eval(im[i])).reshape([-1, 2]), axis=0)
+    return pd.DataFrame({'init_A_mu': ex1[:,0], 'init_b_mu': ex1[:,1], 'init_A_std': ex2[:,0], 'init_b_std':ex2[:,1], 'init_A_l2':ex3[:,0], 'init_b_l2':ex3[:,1]})
+
+
+def diff_avg(arr, header):
+    dif = np.diff(arr)
+    ret = np.empty((dif.shape[0], 7))
+    for j in range(dif.shape[0]):
+        ret[j] = np.mean(dif[j].reshape((7, 7)), axis=1)
+    df_ret = pd.DataFrame(ret)
+    df_ret.columns = [header+str(i) for i in range(7)]
+    return df_ret
+
+
+# df = pd.read_csv("data/train-1185.csv")
+# feature_all = list(df.columns)
+# for i in range(len(feature_all)):
+#     print(i, feature_all[i])
+# print(diff_avg(df[feature_all[17:67]]))
+# diff_avg(df[feature_all[67:117]])
+# diff_avg(df[feature_all[117:167]])
+# diff_avg(df[feature_all[167:217]])
+

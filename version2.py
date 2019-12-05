@@ -15,7 +15,7 @@ from xgboost import plot_importance
 from tqdm import tqdm
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
-from parser_1 import apply_flops, apply_ops_hist
+from parser_1 import apply_flops, apply_ops_hist, apply_init_params, diff_avg
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -32,7 +32,7 @@ def test_to_csv(Regr_train_err, Regr_validation_err, Data_train_std, Data_valida
     df_ex.to_csv(filename, header=True, index=False)
 
 
-df = pd.read_csv("data/train.csv")
+df = pd.read_csv("data/train-1185.csv")
 D = df.shape[0]
 feature_all = list(df.columns)
 # for i in range(len(feature_all)):
@@ -43,15 +43,17 @@ flops = pd.read_csv('flops.csv')
 y_val = df["val_error"]
 y_tr = df["train_error"]
 
-# include all and let pca decide, acc decrease: noise added
-X = (df[feature_all[157:167]+ ['number_parameters', 'epochs']]).join(flops) # train acc
+X = df[feature_all[57:67] + feature_all[107:117] + feature_all[157:167] + feature_all[207:217] + ['number_parameters', 'epochs']].\
+    join(flops).\
+    join(apply_ops_hist(df)).\
+    join(apply_init_params(df))
+    # .\
+    # join(diff_avg(df[feature_all[17:67]], 'val_accs_diff')).\
+    # join(diff_avg(df[feature_all[67:117]], 'val_losses_diff')).\
+    # join(diff_avg(df[feature_all[117:167]], 'train_accs_diff')).\
+    # join(diff_avg(df[feature_all[167:217]], 'train_losses_diff'))  # train acc
 pd.DataFrame(X).to_csv('data matrix.csv')
 X = preprocessing.scale(X)
-# print(np.array(list(df['init_params_mu']), dtype=np.ndarray).shape)
-# print(X.shape)
-# pca = decomposition.PCA(.95)
-# X = pca.fit_transform(X)
-# print(X.shape)
 
 X_train_tr, X_test_tr, y_train_tr, y_test_tr = model_selection.train_test_split(X, y_tr)
 # regr_tr = sk.linear_model.LinearRegression()
@@ -78,16 +80,16 @@ parameter_candidates = {
 #                     n_jobs=-1)
 # regr_tr = sk.linear_model.LinearRegression()
 # regr_tr.fit(X_train_tr, y_train_tr)  # cross validation
-regr_tr = ensemble.GradientBoostingRegressor(criterion= 'friedman_mse', learning_rate=0.1, loss= 'ls', max_depth= 5, max_features='sqrt', n_estimators= 80, subsample= 0.95)
+regr_tr = ensemble.GradientBoostingRegressor()
 regr_tr.fit(X, y_tr)  # submission
 y_pred_tr = regr_tr.predict(X_test_tr)
 # print('the optimal params we found are: ', regr_tr.best_params_)
 print('training err: R2 metric = ', sk.metrics.r2_score(y_test_tr, y_pred_tr))
 
 #############
-# use same X
-X = df[feature_all[57:67] + ['number_parameters', 'epochs']].join(flops) # val acc
-X = preprocessing.scale(X)
+# Use same X: Yes
+# X = df[feature_all[57:67] + ['number_parameters', 'epochs']].join(flops) # val acc
+# X = preprocessing.scale(X)
 # only 1 feature survived pca 95% var, acc decreases?
 # print(X.shape)
 # pca = decomposition.PCA(.95)
@@ -108,7 +110,7 @@ X_train_val, X_test_val, y_train_val, y_test_val = model_selection.train_test_sp
 #                     refit=True,
 #                     error_score=0,
 #                     n_jobs=-1)
-regr_val = ensemble.GradientBoostingRegressor(criterion='friedman_mse', learning_rate= 0.1, loss='lad', max_depth=3, max_features= 'auto', n_estimators= 80, subsample= 0.8)
+regr_val = ensemble.GradientBoostingRegressor()
 
 # regr_val = sk.linear_model.LinearRegression()
 # regr_val.fit(X_train_val, y_train_val)  # cross validation
@@ -122,9 +124,12 @@ df_t = pd.read_csv("data/test.csv")
 #     print(i, df_t.columns[i])
 flops_t = apply_flops(df_t)
 op_hist = apply_ops_hist(df_t)
-X_ex_tr = preprocessing.scale(df_t[list(df_t.columns[153:163]) + ['number_parameters', 'epochs']].join(flops_t))
-X_ex_val = preprocessing.scale(df_t[list(df_t.columns[53:63]) + ['number_parameters', 'epochs']].join(flops_t))
-test_to_csv(regr_tr, regr_val, X_ex_tr, X_ex_val, filename="v11.csv")
+# X_ex_tr = preprocessing.scale(df_t[list(df_t.columns[153:163]) + ['number_parameters', 'epochs']].join(flops_t))
+X_ex = preprocessing.scale(df_t[list(df_t.columns[53:63]) + list(df_t.columns[103:113])  + list(df_t.columns[153:163])  + list(df_t.columns[203:213]) + ['number_parameters', 'epochs']].
+                           join(flops_t).
+                           join(apply_ops_hist(df_t)).
+                           join(apply_init_params(df_t)))
+test_to_csv(regr_tr, regr_val, X_ex, X_ex, filename="v12.csv")
 
 ### explore xgboost
 # xgb_train = xgb.DMatrix(X_train_val, label=y_train_val)
