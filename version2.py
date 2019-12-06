@@ -53,6 +53,7 @@ X = df[feature_all[57:67] + feature_all[107:117] + feature_all[157:167] + featur
     join(diff_avg(df[feature_all[117:167]], 'train_accs_diff')).\
     join(diff_avg(df[feature_all[167:217]], 'train_losses_diff'))  # train acc
 pd.DataFrame(X).to_csv('data matrix.csv')
+model_features = X.columns
 X = preprocessing.scale(X)
 
 X_train_tr, X_test_tr, y_train_tr, y_test_tr = model_selection.train_test_split(X, y_tr)
@@ -136,26 +137,32 @@ print("validation Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 
 
 
 # ######
-# df_t = pd.read_csv("data/test.csv")
-# # for i in range(len(df_t.columns)):
-# #     print(i, df_t.columns[i])
-# flops_t = apply_flops(df_t)
-# op_hist = apply_ops_hist(df_t)
-# # X_ex_tr = preprocessing.scale(df_t[list(df_t.columns[153:163]) + ['number_parameters', 'epochs']].join(flops_t))
-# X_ex = preprocessing.scale(df_t[feature_all[57:67] + feature_all[107:117] + feature_all[157:167] + feature_all[207:217] + ['number_parameters', 'epochs']].
-#                            join(flops_t).
-#                            join(apply_ops_hist(df_t)).
-#                            join(apply_init_params(df_t)).
-#                            join(diff_avg(df_t[feature_all[17:67]], 'val_accs_diff')).\
-#     join(diff_avg(df_t[feature_all[67:117]], 'val_losses_diff')).\
-#     join(diff_avg(df_t[feature_all[117:167]], 'train_accs_diff')).\
-#     join(diff_avg(df_t[feature_all[167:217]], 'train_losses_diff')))
-# test_to_csv(regr_tr, regr_val, X_ex, X_ex, filename="v14.csv")
+df_t = pd.read_csv("data/test.csv")
+# for i in range(len(df_t.columns)):
+#     print(i, df_t.columns[i])
+flops_t = apply_flops(df_t)
+op_hist = apply_ops_hist(df_t)
+# X_ex_tr = preprocessing.scale(df_t[list(df_t.columns[153:163]) + ['number_parameters', 'epochs']].join(flops_t))
+X_ex = preprocessing.scale(df_t[feature_all[57:67] + feature_all[107:117] + feature_all[157:167] + feature_all[207:217] + ['number_parameters', 'epochs']].
+                           join(flops_t).
+                           join(apply_ops_hist(df_t)).
+                           join(apply_init_params(df_t)).
+                           join(diff_avg(df_t[feature_all[17:67]], 'val_accs_diff')).\
+    join(diff_avg(df_t[feature_all[67:117]], 'val_losses_diff')).\
+    join(diff_avg(df_t[feature_all[117:167]], 'train_accs_diff')).\
+    join(diff_avg(df_t[feature_all[167:217]], 'train_losses_diff')))
+test_to_csv(regr_tr, regr_val, X_ex, X_ex, filename="v16_2.csv")
 
+
+indices = np.argsort(regr_tr.feature_importances_)[-15:]
+# plt.figure(figsize=[10, 15], dpi=200)
+plt.title('Feature Importances')
+plt.barh(range(len(indices)), regr_tr.feature_importances_[indices], color='b', align='center')
+plt.yticks(range(len(indices)), [model_features[i] for i in indices], fontsize=5)
 ### explore xgboost
 # xgb_train = xgb.DMatrix(X_train_val, label=y_train_val)
 # xgb_test = xgb.DMatrix(X_test_val, label=y_test_val)
-# param = {'max_depth': 20, 'silent': 1, 'objective': 'reg:gamma'}
+# param = {'max_depth': 5, 'silent': 1, 'objective': 'reg:squarederror'}
 # evallist = [(xgb_test, 'eval'), (xgb_train, 'train')]
 # num_round = 100
 # bst = xgb.train(param, xgb_train, num_round, evallist)
@@ -163,5 +170,6 @@ print("validation Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 
 # print('validation err: R2 metric = ', sk.metrics.r2_score(y_test_val, y_pred_val))
 # fig, ax = plt.subplots(figsize=(10, 15))
 # plot_importance(bst, height=0.5, max_num_features=64, ax=ax)
+plt.savefig('tuned_model_tr_imp.png', dpi=300)
 # plt.show()
 
