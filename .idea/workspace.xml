@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="40afe8d6-6097-4c63-a20f-3b1efee1d23b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data matrix.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data matrix.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/parser_1.py" beforeDir="false" afterPath="$PROJECT_DIR$/parser_1.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version2.py" beforeDir="false" afterPath="$PROJECT_DIR$/version2.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -15,10 +12,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/version2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="860">
+            <state relative-caret-position="1644">
               <caret line="158" column="32" lean-forward="true" selection-start-line="158" selection-start-column="32" selection-end-line="158" selection-end-column="32" />
               <folding>
                 <element signature="e#47#61#0" expanded="true" />
@@ -47,11 +44,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/parser_1.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="450">
-              <caret line="30" column="51" lean-forward="true" selection-start-line="30" selection-start-column="51" selection-end-line="30" selection-end-column="51" />
+            <state relative-caret-position="362">
+              <caret line="119" column="21" lean-forward="true" selection-start-line="119" selection-start-column="21" selection-end-line="119" selection-end-column="21" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -115,8 +112,8 @@
       <find>l_svr</find>
       <find>pca</find>
       <find>best</find>
-      <find>parse_struct</find>
       <find>regr</find>
+      <find>parse_struct</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -132,8 +129,8 @@
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/leihaoc2.py" />
         <option value="$PROJECT_DIR$/parser.py" />
-        <option value="$PROJECT_DIR$/parser_1.py" />
         <option value="$PROJECT_DIR$/version2.py" />
+        <option value="$PROJECT_DIR$/parser_1.py" />
       </list>
     </option>
   </component>
@@ -356,12 +353,12 @@
       <workItem from="1575309971993" duration="1228000" />
       <workItem from="1575501129889" duration="11637000" />
       <workItem from="1575583762362" duration="1198000" />
-      <workItem from="1575595239106" duration="7865000" />
+      <workItem from="1575595239106" duration="8239000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="46499000" />
+    <option name="totallyTimeSpent" value="46873000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1080" y="-898" width="1080" height="1920" extended-state="0" />
@@ -396,7 +393,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CS446_project$autokeras_text.coverage" NAME="autokeras_text Coverage Results" MODIFIED="1575047683409" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/CS446_project$version2.coverage" NAME="version2 Coverage Results" MODIFIED="1575663419716" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/CS446_project$version2.coverage" NAME="version2 Coverage Results" MODIFIED="1575664666659" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CS446_project$leihaoc2.coverage" NAME="leihaoc2 Coverage Results" MODIFIED="1575254879198" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CS446_project$pytorch_net.coverage" NAME="pytorch_net Coverage Results" MODIFIED="1575254327553" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CS446_project$backup.coverage" NAME="backup Coverage Results" MODIFIED="1575310247250" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -557,22 +554,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/version2.py">
+    <entry file="file://$PROJECT_DIR$/parser_1.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="860">
-          <caret line="158" column="32" lean-forward="true" selection-start-line="158" selection-start-column="32" selection-end-line="158" selection-end-column="32" />
+        <state relative-caret-position="362">
+          <caret line="119" column="21" lean-forward="true" selection-start-line="119" selection-start-column="21" selection-end-line="119" selection-end-column="21" />
           <folding>
-            <element signature="e#47#61#0" expanded="true" />
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/parser_1.py">
+    <entry file="file://$PROJECT_DIR$/version2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="30" column="51" lean-forward="true" selection-start-line="30" selection-start-column="51" selection-end-line="30" selection-end-column="51" />
+        <state relative-caret-position="1644">
+          <caret line="158" column="32" lean-forward="true" selection-start-line="158" selection-start-column="32" selection-end-line="158" selection-end-column="32" />
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#47#61#0" expanded="true" />
           </folding>
         </state>
       </provider>

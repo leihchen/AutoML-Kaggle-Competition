@@ -84,7 +84,9 @@ parameter_candidates = {
 #                     n_jobs=-1)
 # regr_tr = sk.linear_model.LinearRegression()
 # regr_tr.fit(X_train_tr, y_train_tr)  # cross validation
-regr_tr = ensemble.GradientBoostingRegressor(loss="ls", max_depth=4, subsample=0.9, n_estimators=140)
+# regr_tr = ensemble.GradientBoostingRegressor(loss="ls", max_depth=4, subsample=0.9, n_estimators=140)
+regr_tr = xgb.XGBRegressor(missing=np.nan)
+
 regr_tr.fit(X, y_tr)  # submission
 y_pred_tr = regr_tr.predict(X_test_tr)
 # print('the optimal params we found are: ', regr_tr.best_params_)
@@ -114,7 +116,8 @@ X_train_val, X_test_val, y_train_val, y_test_val = model_selection.train_test_sp
 #                     refit=True,
 #                     error_score=0,
 #                     n_jobs=-1)
-regr_val = ensemble.GradientBoostingRegressor(loss="huber", max_depth=5, subsample=1.0)
+# regr_val = ensemble.GradientBoostingRegressor(loss="huber", max_depth=5, subsample=1.0)
+regr_val = xgb.XGBRegressor(missing=np.nan)
 
 # regr_val = sk.linear_model.LinearRegression()
 # regr_val.fit(X_train_val, y_train_val)  # cross validation
