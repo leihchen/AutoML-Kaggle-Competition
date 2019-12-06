@@ -24,6 +24,23 @@ def parse_struct(archline):
     return ReLU, LeakyReLU, SELU, Linear, Conv2d, BatchNorm1d, BatchNorm2d, Flatten, Dropout, Dropout2d, Tanh, Softmax, MaxPool2d
 
 
+def parse_order(archline):
+    x = [m.start() for m in re.finditer('Conv2d', archline)]
+    Conv2d = list(zip(x, np.full(len(x), 0)))
+    x = [m.start() for m in re.finditer('Linear', archline)]
+    Linear = list(zip(x, np.full(len(x), 1)))
+    x = [m.start() for m in re.finditer('BatchNorm1d', archline)]
+    BatchNorm1d = list(zip(x, np.full(len(x), 2)))
+    x = [m.start() for m in re.finditer('BatchNorm2d', archline)]
+    BatchNorm2d = list(zip(x, np.full(len(x), 3)))
+    result = Conv2d+Linear+BatchNorm1d+BatchNorm2d
+    result = sorted(result, key=lambda x: x[0])
+    ret = list(zip(*result))
+    if len(ret) != 0:
+        ret = ret[1]
+    return ret
+
+
 def calculate_flop(archline):
     result = 0
     Conv2dstart = archline.find(': Conv2d(')
@@ -125,8 +142,6 @@ def diff_avg(arr, header):
     df_ret = pd.DataFrame(ret)
     df_ret.columns = [header+str(i) for i in range(7)]
     return df_ret
-
-
 # df = pd.read_csv("data/train-1185.csv")
 # feature_all = list(df.columns)
 # for i in range(len(feature_all)):
