@@ -61,22 +61,12 @@ X_train_tr, X_test_tr, y_train_tr, y_test_tr = model_selection.train_test_split(
 # regr_tr.fit(X_train_tr, y_train_tr)
 # y_pred_tr = regr_tr.predict(X_test_tr)
 # print('Linear regression training err: R2 metric = ', sk.metrics.r2_score(y_test_tr, y_pred_tr))
-# parameter_candidates = {
-#     "loss":["ls", "lad"],
-#     "learning_rate": [0.01, 0.025, 0.05, 0.1, 0.2],
-#     "min_samples_split": np.linspace(0.1, 0.5, 2, 4),
-#     "min_samples_leaf": np.linspace(0.1, 0.5, 1, 3),
-#     "max_depth":[3,5,8],
-#     "max_features":["log2","sqrt", "auto"],
-#     "criterion": ["friedman_mse",  "mae"],
-#     "subsample":[0.5, 0.618, 0.8, 0.85, 0.9, 0.95, 1.0],
-#     "n_estimators":[120, 140, 160]
-# }
 parameter_candidates = {
-    "min_samples_split": np.linspace(0.1, 0.5, 5, 4)
+    "objective":["reg:squaredlogerror", "reg:squarederror", "reg:logistic"]
 }
 
-# regr_tr = GridSearchCV(estimator=ensemble.GradientBoostingRegressor(loss="ls", max_depth=4, subsample=0.9),
+
+# regr_tr = GridSearchCV(estimator=xgb.XGBRegressor(reg:logistic,missing=np.nan, max_depth=4, learning_rate=0.2, n_estimators=150, subsample=1.0),
 #                     param_grid=parameter_candidates,
 #                     cv=5,
 #                     refit=True,
@@ -85,7 +75,7 @@ parameter_candidates = {
 # regr_tr = sk.linear_model.LinearRegression()
 # regr_tr.fit(X_train_tr, y_train_tr)  # cross validation
 # regr_tr = ensemble.GradientBoostingRegressor(loss="ls", max_depth=4, subsample=0.9, n_estimators=140)
-regr_tr = xgb.XGBRegressor(missing=np.nan)
+regr_tr = xgb.XGBRegressor(objective ='reg:logistic',missing=np.nan, max_depth=4, learning_rate=0.2, n_estimators=150, subsample=1.0)
 
 regr_tr.fit(X, y_tr)  # submission
 y_pred_tr = regr_tr.predict(X_test_tr)
@@ -110,14 +100,14 @@ X_train_val, X_test_val, y_train_val, y_test_val = model_selection.train_test_sp
 
 ###
 
-# regr_val = GridSearchCV(estimator=ensemble.GradientBoostingRegressor(loss="huber", max_depth=5, subsample=1.0),
-#                     param_grid=parameter_candidates,
-#                     cv=5,
-#                     refit=True,
-#                     error_score=0,
-#                     n_jobs=-1)
+regr_val = GridSearchCV(estimator=xgb.XGBRegressor(missing=np.nan, max_depth=4,learning_rate=0.1, n_estimators=170, subsample=0.8),
+                    param_grid=parameter_candidates,
+                    cv=5,
+                    refit=True,
+                    error_score=0,
+                    n_jobs=-1)
 # regr_val = ensemble.GradientBoostingRegressor(loss="huber", max_depth=5, subsample=1.0)
-regr_val = xgb.XGBRegressor(missing=np.nan)
+regr_val = xgb.XGBRegressor(objective ='reg:squarederror',missing=np.nan, max_depth=4,learning_rate=0.1, n_estimators=170, subsample=0.8)
 
 # regr_val = sk.linear_model.LinearRegression()
 # regr_val.fit(X_train_val, y_train_val)  # cross validation
@@ -139,40 +129,40 @@ print("validation Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 
 
 
 
-# ######
-df_t = pd.read_csv("data/test.csv")
-# for i in range(len(df_t.columns)):
-#     print(i, df_t.columns[i])
-flops_t = apply_flops(df_t)
-op_hist = apply_ops_hist(df_t)
-# X_ex_tr = preprocessing.scale(df_t[list(df_t.columns[153:163]) + ['number_parameters', 'epochs']].join(flops_t))
-X_ex = preprocessing.scale(df_t[feature_all[57:67] + feature_all[107:117] + feature_all[157:167] + feature_all[207:217] + ['number_parameters', 'epochs']].
-                           join(flops_t).
-                           join(apply_ops_hist(df_t)).
-                           join(apply_init_params(df_t)).
-                           join(diff_avg(df_t[feature_all[17:67]], 'val_accs_diff')).\
-    join(diff_avg(df_t[feature_all[67:117]], 'val_losses_diff')).\
-    join(diff_avg(df_t[feature_all[117:167]], 'train_accs_diff')).\
-    join(diff_avg(df_t[feature_all[167:217]], 'train_losses_diff')))
-test_to_csv(regr_tr, regr_val, X_ex, X_ex, filename="v16_2.csv")
+# # ######
+# df_t = pd.read_csv("data/test.csv")
+# # for i in range(len(df_t.columns)):
+# #     print(i, df_t.columns[i])
+# flops_t = apply_flops(df_t)
+# op_hist = apply_ops_hist(df_t)
+# # X_ex_tr = preprocessing.scale(df_t[list(df_t.columns[153:163]) + ['number_parameters', 'epochs']].join(flops_t))
+# X_ex = preprocessing.scale(df_t[feature_all[57:67] + feature_all[107:117] + feature_all[157:167] + feature_all[207:217] + ['number_parameters', 'epochs']].
+#                            join(flops_t).
+#                            join(apply_ops_hist(df_t)).
+#                            join(apply_init_params(df_t)).
+#                            join(diff_avg(df_t[feature_all[17:67]], 'val_accs_diff')).\
+#     join(diff_avg(df_t[feature_all[67:117]], 'val_losses_diff')).\
+#     join(diff_avg(df_t[feature_all[117:167]], 'train_accs_diff')).\
+#     join(diff_avg(df_t[feature_all[167:217]], 'train_losses_diff')))
+# test_to_csv(regr_tr, regr_val, X_ex, X_ex, filename="v16_2.csv")
 
 
-indices = np.argsort(regr_tr.feature_importances_)[-15:]
-# plt.figure(figsize=[10, 15], dpi=200)
-plt.title('Feature Importances')
-plt.barh(range(len(indices)), regr_tr.feature_importances_[indices], color='b', align='center')
-plt.yticks(range(len(indices)), [model_features[i] for i in indices], fontsize=5)
-### explore xgboost
-# xgb_train = xgb.DMatrix(X_train_val, label=y_train_val)
-# xgb_test = xgb.DMatrix(X_test_val, label=y_test_val)
-# param = {'max_depth': 5, 'silent': 1, 'objective': 'reg:squarederror'}
-# evallist = [(xgb_test, 'eval'), (xgb_train, 'train')]
-# num_round = 100
-# bst = xgb.train(param, xgb_train, num_round, evallist)
-# y_pred_val = bst.predict(xgb_test)
-# print('validation err: R2 metric = ', sk.metrics.r2_score(y_test_val, y_pred_val))
-# fig, ax = plt.subplots(figsize=(10, 15))
-# plot_importance(bst, height=0.5, max_num_features=64, ax=ax)
-plt.savefig('tuned_model_tr_imp.png', dpi=300)
-# plt.show()
+# indices = np.argsort(regr_tr.feature_importances_)[-15:]
+# # plt.figure(figsize=[10, 15], dpi=200)
+# plt.title('Feature Importances')
+# plt.barh(range(len(indices)), regr_tr.feature_importances_[indices], color='b', align='center')
+# plt.yticks(range(len(indices)), [model_features[i] for i in indices], fontsize=5)
+# ### explore xgboost
+# # xgb_train = xgb.DMatrix(X_train_val, label=y_train_val)
+# # xgb_test = xgb.DMatrix(X_test_val, label=y_test_val)
+# # param = {'max_depth': 5, 'silent': 1, 'objective': 'reg:squarederror'}
+# # evallist = [(xgb_test, 'eval'), (xgb_train, 'train')]
+# # num_round = 100
+# # bst = xgb.train(param, xgb_train, num_round, evallist)
+# # y_pred_val = bst.predict(xgb_test)
+# # print('validation err: R2 metric = ', sk.metrics.r2_score(y_test_val, y_pred_val))
+# # fig, ax = plt.subplots(figsize=(10, 15))
+# # plot_importance(bst, height=0.5, max_num_features=64, ax=ax)
+# plt.savefig('tuned_model_tr_imp.png', dpi=300)
+# # plt.show()
 
