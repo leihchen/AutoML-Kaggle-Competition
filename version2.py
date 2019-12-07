@@ -100,12 +100,12 @@ X_train_val, X_test_val, y_train_val, y_test_val = model_selection.train_test_sp
 
 ###
 
-regr_val = GridSearchCV(estimator=xgb.XGBRegressor(missing=np.nan, max_depth=4,learning_rate=0.1, n_estimators=170, subsample=0.8),
-                    param_grid=parameter_candidates,
-                    cv=5,
-                    refit=True,
-                    error_score=0,
-                    n_jobs=-1)
+# regr_val = GridSearchCV(estimator=xgb.XGBRegressor(missing=np.nan, max_depth=4,learning_rate=0.1, n_estimators=170, subsample=0.8),
+#                     param_grid=parameter_candidates,
+#                     cv=5,
+#                     refit=True,
+#                     error_score=0,
+#                     n_jobs=-1)
 # regr_val = ensemble.GradientBoostingRegressor(loss="huber", max_depth=5, subsample=1.0)
 regr_val = xgb.XGBRegressor(objective ='reg:squarederror',missing=np.nan, max_depth=4,learning_rate=0.1, n_estimators=170, subsample=0.8)
 
