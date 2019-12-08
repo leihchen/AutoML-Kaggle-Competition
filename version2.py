@@ -62,11 +62,11 @@ X_train_tr, X_test_tr, y_train_tr, y_test_tr = model_selection.train_test_split(
 # y_pred_tr = regr_tr.predict(X_test_tr)
 # print('Linear regression training err: R2 metric = ', sk.metrics.r2_score(y_test_tr, y_pred_tr))
 parameter_candidates = {
-    "objective":["reg:squaredlogerror", "reg:squarederror", "reg:logistic"]
+    "subsample":[0.5, 0.55, 0.6, 0.65, 0.7]
 }
 
 
-# regr_tr = GridSearchCV(estimator=xgb.XGBRegressor(reg:logistic,missing=np.nan, max_depth=4, learning_rate=0.2, n_estimators=150, subsample=1.0),
+# regr_tr = GridSearchCV(estimator=xgb.XGBRegressor(objective ='reg:logistic',missing=np.nan, max_depth=4, learning_rate=0.08, n_estimators=190, subsample=0.5),
 #                     param_grid=parameter_candidates,
 #                     cv=5,
 #                     refit=True,
@@ -75,7 +75,7 @@ parameter_candidates = {
 # regr_tr = sk.linear_model.LinearRegression()
 # regr_tr.fit(X_train_tr, y_train_tr)  # cross validation
 # regr_tr = ensemble.GradientBoostingRegressor(loss="ls", max_depth=4, subsample=0.9, n_estimators=140)
-regr_tr = xgb.XGBRegressor(objective ='reg:logistic',missing=np.nan, max_depth=4, learning_rate=0.2, n_estimators=150, subsample=1.0)
+regr_tr = xgb.XGBRegressor(objective ='reg:logistic',missing=np.nan, max_depth=4, learning_rate=0.08, n_estimators=190, subsample=0.5)
 
 regr_tr.fit(X, y_tr)  # submission
 y_pred_tr = regr_tr.predict(X_test_tr)
@@ -100,14 +100,14 @@ X_train_val, X_test_val, y_train_val, y_test_val = model_selection.train_test_sp
 
 ###
 
-# regr_val = GridSearchCV(estimator=xgb.XGBRegressor(missing=np.nan, max_depth=4,learning_rate=0.1, n_estimators=170, subsample=0.8),
+# regr_val = GridSearchCV(estimator=xgb.XGBRegressor(objective ='reg:logistic',missing=np.nan, max_depth=4,learning_rate=0.08, n_estimators=200, subsample=0.7),
 #                     param_grid=parameter_candidates,
 #                     cv=5,
 #                     refit=True,
 #                     error_score=0,
 #                     n_jobs=-1)
 # regr_val = ensemble.GradientBoostingRegressor(loss="huber", max_depth=5, subsample=1.0)
-regr_val = xgb.XGBRegressor(objective ='reg:squarederror',missing=np.nan, max_depth=4,learning_rate=0.1, n_estimators=170, subsample=0.8)
+regr_val = xgb.XGBRegressor(objective ='reg:logistic',missing=np.nan, max_depth=4,learning_rate=0.08, n_estimators=200, subsample=0.7)
 
 # regr_val = sk.linear_model.LinearRegression()
 # regr_val.fit(X_train_val, y_train_val)  # cross validation
@@ -117,10 +117,10 @@ y_pred_val = regr_val.predict(X_test_val)
 print('validation err: R2 metric = ', sk.metrics.r2_score(y_test_val, y_pred_val))
 
 ##### CV
-# scores = cross_val_score(regr_tr, X, y_tr)
-# print("training Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 2))
-# scores = cross_val_score(regr_val, X, y_val)
-# print("validation Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 2))
+scores = cross_val_score(regr_tr, X, y_tr)
+print("training Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 2))
+scores = cross_val_score(regr_val, X, y_val)
+print("validation Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 2))
 
 
 
@@ -129,22 +129,22 @@ print('validation err: R2 metric = ', sk.metrics.r2_score(y_test_val, y_pred_val
 
 
 
-# # ######
-df_t = pd.read_csv("data/test.csv")
-# for i in range(len(df_t.columns)):
-#     print(i, df_t.columns[i])
-flops_t = apply_flops(df_t)
-op_hist = apply_ops_hist(df_t)
-# X_ex_tr = preprocessing.scale(df_t[list(df_t.columns[153:163]) + ['number_parameters', 'epochs']].join(flops_t))
-X_ex = preprocessing.scale(df_t[feature_all[17:] + ['number_parameters', 'epochs']].
-                           join(flops_t).
-                           join(apply_ops_hist(df_t)).
-                           join(apply_init_params(df_t)).
-                           join(diff_avg(df_t[feature_all[17:67]], 'val_accs_diff')).\
-    join(diff_avg(df_t[feature_all[67:117]], 'val_losses_diff')).\
-    join(diff_avg(df_t[feature_all[117:167]], 'train_accs_diff')).\
-    join(diff_avg(df_t[feature_all[167:217]], 'train_losses_diff')))
-test_to_csv(regr_tr, regr_val, X_ex, X_ex, filename="v18_1.csv")
+# # # ######
+# df_t = pd.read_csv("data/test.csv")
+# # for i in range(len(df_t.columns)):
+# #     print(i, df_t.columns[i])
+# flops_t = apply_flops(df_t)
+# op_hist = apply_ops_hist(df_t)
+# # X_ex_tr = preprocessing.scale(df_t[list(df_t.columns[153:163]) + ['number_parameters', 'epochs']].join(flops_t))
+# X_ex = preprocessing.scale(df_t[feature_all[17:] + ['number_parameters', 'epochs']].
+#                            join(flops_t).
+#                            join(apply_ops_hist(df_t)).
+#                            join(apply_init_params(df_t)).
+#                            join(diff_avg(df_t[feature_all[17:67]], 'val_accs_diff')).\
+#     join(diff_avg(df_t[feature_all[67:117]], 'val_losses_diff')).\
+#     join(diff_avg(df_t[feature_all[117:167]], 'train_accs_diff')).\
+#     join(diff_avg(df_t[feature_all[167:217]], 'train_losses_diff')))
+# test_to_csv(regr_tr, regr_val, X_ex, X_ex, filename="v18_1.csv")
 
 
 # indices = np.argsort(regr_tr.feature_importances_)[-15:]
