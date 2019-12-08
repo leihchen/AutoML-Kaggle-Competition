@@ -43,7 +43,7 @@ flops = pd.read_csv('flops.csv')
 y_val = df["val_error"]
 y_tr = df["train_error"]
 
-X = df[feature_all[57:67] + feature_all[107:117] + feature_all[157:167] + feature_all[207:217] + ['number_parameters', 'epochs']].\
+X = df[feature_all[17:] + ['number_parameters', 'epochs']].\
     join(flops).\
     join(apply_ops_hist(df)).\
     join(apply_init_params(df))\
@@ -117,10 +117,10 @@ y_pred_val = regr_val.predict(X_test_val)
 print('validation err: R2 metric = ', sk.metrics.r2_score(y_test_val, y_pred_val))
 
 ##### CV
-scores = cross_val_score(regr_tr, X, y_tr)
-print("training Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 2))
-scores = cross_val_score(regr_val, X, y_val)
-print("validation Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 2))
+# scores = cross_val_score(regr_tr, X, y_tr)
+# print("training Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 2))
+# scores = cross_val_score(regr_val, X, y_val)
+# print("validation Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 2))
 
 
 
@@ -130,21 +130,21 @@ print("validation Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 
 
 
 # # ######
-# df_t = pd.read_csv("data/test.csv")
-# # for i in range(len(df_t.columns)):
-# #     print(i, df_t.columns[i])
-# flops_t = apply_flops(df_t)
-# op_hist = apply_ops_hist(df_t)
-# # X_ex_tr = preprocessing.scale(df_t[list(df_t.columns[153:163]) + ['number_parameters', 'epochs']].join(flops_t))
-# X_ex = preprocessing.scale(df_t[feature_all[57:67] + feature_all[107:117] + feature_all[157:167] + feature_all[207:217] + ['number_parameters', 'epochs']].
-#                            join(flops_t).
-#                            join(apply_ops_hist(df_t)).
-#                            join(apply_init_params(df_t)).
-#                            join(diff_avg(df_t[feature_all[17:67]], 'val_accs_diff')).\
-#     join(diff_avg(df_t[feature_all[67:117]], 'val_losses_diff')).\
-#     join(diff_avg(df_t[feature_all[117:167]], 'train_accs_diff')).\
-#     join(diff_avg(df_t[feature_all[167:217]], 'train_losses_diff')))
-# test_to_csv(regr_tr, regr_val, X_ex, X_ex, filename="v16_2.csv")
+df_t = pd.read_csv("data/test.csv")
+# for i in range(len(df_t.columns)):
+#     print(i, df_t.columns[i])
+flops_t = apply_flops(df_t)
+op_hist = apply_ops_hist(df_t)
+# X_ex_tr = preprocessing.scale(df_t[list(df_t.columns[153:163]) + ['number_parameters', 'epochs']].join(flops_t))
+X_ex = preprocessing.scale(df_t[feature_all[17:] + ['number_parameters', 'epochs']].
+                           join(flops_t).
+                           join(apply_ops_hist(df_t)).
+                           join(apply_init_params(df_t)).
+                           join(diff_avg(df_t[feature_all[17:67]], 'val_accs_diff')).\
+    join(diff_avg(df_t[feature_all[67:117]], 'val_losses_diff')).\
+    join(diff_avg(df_t[feature_all[117:167]], 'train_accs_diff')).\
+    join(diff_avg(df_t[feature_all[167:217]], 'train_losses_diff')))
+test_to_csv(regr_tr, regr_val, X_ex, X_ex, filename="v18_1.csv")
 
 
 # indices = np.argsort(regr_tr.feature_importances_)[-15:]

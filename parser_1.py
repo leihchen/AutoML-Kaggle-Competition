@@ -117,7 +117,7 @@ def apply_ops_hist(df_):
 # print(params_ex)
 
 
-def apply_init_params(df_, missing=np.nan):
+def apply_init_params(df_, missing=0.0):
     archs = (df_['arch_and_hp'])
     im = np.array(df_['init_params_mu'], dtype=str)
     ex1 = np.zeros((4, len(im), 2))
