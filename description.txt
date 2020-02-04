@@ -1,0 +1,14 @@
+The main function is in version2.py and parsing helper functions are in parser_1.py. 
+We parse the structure of the neural network and then reconstruct the pytorch model.
+Our constructed feature and original feature are included in 'data matrix.csv.' 
+Then we use xbgboosting model to fit the data by different weight. 
+We tune the paramters using GridSearchCV.
+
+List of constructed feature:
+tot_flops: Number of FLOPS involved in neural network provided.
+ReLU...MaxPool2d: Counter of all operation in neural network provided.
+init_b_mu_Conv2d...init_b_l2_BatchNorm2d: Sum of all initial params for different operations.
+val_accs_diff0...val_accs_diff6: Differences between val_accs over all epochs averaged over a 7 * 7 grid.
+val_losses_diff0...val_losses_diff6: Differences between val_losses over all epochs averaged over a 7 * 7 grid.
+train_accs_diff0...train_accs_diff6: Differences between train_accs over all epochs averaged over a 7 * 7 grid.
+train_losses_diff0...train_losses_diff6: Differences between train_losses over all epochs averaged over a 7 * 7 grid.

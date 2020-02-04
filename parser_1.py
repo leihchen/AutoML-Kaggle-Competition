@@ -7,6 +7,7 @@ from torch.nn import Sequential, ReLU, LeakyReLU, SELU, Linear, Conv2d, BatchNor
 import pandas as pd
 import numpy as np
 
+
 def parse_struct(archline):
     ReLU = archline.count(": ReLU(")
     LeakyReLU = archline.count(": LeakyReLU(")
@@ -22,6 +23,23 @@ def parse_struct(archline):
     Softmax = archline.count(": Softmax(")
     MaxPool2d = archline.count(": MaxPool2d(")
     return ReLU, LeakyReLU, SELU, Linear, Conv2d, BatchNorm1d, BatchNorm2d, Flatten, Dropout, Dropout2d, Tanh, Softmax, MaxPool2d
+
+
+def parse_order(archline):
+    x = [m.start() for m in re.finditer('Conv2d', archline)]
+    Conv2d = list(zip(x, np.full(len(x), 0)))
+    x = [m.start() for m in re.finditer('Linear', archline)]
+    Linear = list(zip(x, np.full(len(x), 1)))
+    x = [m.start() for m in re.finditer('BatchNorm1d', archline)]
+    BatchNorm1d = list(zip(x, np.full(len(x), 2)))
+    x = [m.start() for m in re.finditer('BatchNorm2d', archline)]
+    BatchNorm2d = list(zip(x, np.full(len(x), 3)))
+    result = Conv2d+Linear+BatchNorm1d+BatchNorm2d
+    result = sorted(result, key=lambda x: x[0])
+    ret = list(zip(*result))
+    if len(ret) != 0:
+        ret = ret[1]
+    return np.array(ret)
 
 
 def calculate_flop(archline):
@@ -99,22 +117,57 @@ def apply_ops_hist(df_):
 # print(params_ex)
 
 
-def apply_init_params(df_):
+def apply_init_params(df_, missing=0.0):
+    archs = (df_['arch_and_hp'])
     im = np.array(df_['init_params_mu'], dtype=str)
-    ex1 = np.zeros((len(im), 2))
+    ex1 = np.zeros((4, len(im), 2))
+
     for i in range(len(im)):
-        ex1[i] = np.sum(np.array(eval(im[i])).reshape([-1, 2]), axis=0)
+        init_Ab = np.array(eval(im[i])).reshape([-1, 2])
+        op_list = parse_order(archs[i])
+        for op in range(4):
+            ex1[op][i] = np.sum(init_Ab[op_list == op], axis=0) / np.sum(op_list == op) if (op_list == op).any() else [missing, missing]
 
     im = np.array(df_['init_params_std'], dtype=str)
-    ex2 = np.zeros((len(im), 2))
+    ex2 = np.zeros((4, len(im), 2))
     for i in range(len(im)):
-        ex2[i] = np.sum(np.array(eval(im[i])).reshape([-1, 2]), axis=0)
+        init_Ab = np.array(eval(im[i])).reshape([-1, 2])
+        op_list = parse_order(archs[i])
+        for op in range(4):
+            ex2[op][i] = np.sum(init_Ab[op_list == op], axis=0) / np.sum(op_list == op) if (op_list == op).any() else [missing, missing]
 
     im = np.array(df_['init_params_l2'], dtype=str)
-    ex3 = np.zeros((len(im), 2))
+    ex3 = np.zeros((4, len(im), 2))
     for i in range(len(im)):
-        ex3[i] = np.sum(np.array(eval(im[i])).reshape([-1, 2]), axis=0)
-    return pd.DataFrame({'init_A_mu': ex1[:,0], 'init_b_mu': ex1[:,1], 'init_A_std': ex2[:,0], 'init_b_std':ex2[:,1], 'init_A_l2':ex3[:,0], 'init_b_l2':ex3[:,1]})
+        init_Ab = np.array(eval(im[i])).reshape([-1, 2])
+        op_list = parse_order(archs[i])
+        for op in range(4):
+            ex3[op][i] = np.sum(init_Ab[op_list == op], axis=0) / np.sum(op_list == op) if (op_list == op).any() else [missing, missing]
+    return pd.DataFrame(
+        {'init_A_mu_Conv2d': ex1[0][:, 0],
+         'init_b_mu_Conv2d': ex1[0][:, 1],
+         'init_A_std_Conv2d': ex2[0][:, 0],
+         'init_b_std_Conv2d': ex2[0][:, 1],
+         'init_A_l2_Conv2d': ex3[0][:, 0],
+         'init_b_l2_Conv2d': ex3[0][:, 1],
+         'init_A_mu_Linear': ex1[1][:, 0],
+         'init_b_mu_Linear': ex1[1][:, 1],
+         'init_A_std_Linear': ex2[1][:, 0],
+         'init_b_std_Linear': ex2[1][:, 1],
+         'init_A_l2_Linear': ex3[1][:, 0],
+         'init_b_l2_Linear': ex3[1][:, 1],
+         'init_A_mu_BatchNorm1d': ex1[2][:, 0],
+         'init_b_mu_BatchNorm1d': ex1[2][:, 1],
+         'init_A_std_BatchNorm1d': ex2[2][:, 0],
+         'init_b_std_BatchNorm1d': ex2[2][:, 1],
+         'init_A_l2_BatchNorm1d': ex3[2][:, 0],
+         'init_b_l2_BatchNorm1d': ex3[2][:, 1],
+         'init_A_mu_BatchNorm2d': ex1[3][:, 0],
+         'init_b_mu_BatchNorm2d': ex1[3][:, 1],
+         'init_A_std_BatchNorm2d': ex2[3][:, 0],
+         'init_b_std_BatchNorm2d': ex2[3][:, 1],
+         'init_A_l2_BatchNorm2d': ex3[3][:, 0],
+         'init_b_l2_BatchNorm2d': ex3[3][:, 1]})
 
 
 def diff_avg(arr, header):
@@ -125,9 +178,8 @@ def diff_avg(arr, header):
     df_ret = pd.DataFrame(ret)
     df_ret.columns = [header+str(i) for i in range(7)]
     return df_ret
-
-
 # df = pd.read_csv("data/train-1185.csv")
+# apply_init_params(df)
 # feature_all = list(df.columns)
 # for i in range(len(feature_all)):
 #     print(i, feature_all[i])
